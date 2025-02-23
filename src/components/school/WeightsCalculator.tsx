@@ -112,7 +112,7 @@ const WeightsCalculator = () => {
     <Card className="mt-8" dir="rtl">
       <CardHeader className="border-b border-gray-200">
         <div className="flex items-baseline gap-2">
-          <h2 className="text-2xl font-bold">ציון משוקלל לביה"ס:</h2>
+          <h2 className="text-2xl font-bold">ציון משוקלל לבית הספר:</h2>
           <span className="text-2xl">{schoolName}</span>
         </div>
       </CardHeader>
@@ -141,7 +141,7 @@ const WeightsCalculator = () => {
                 </tr>
               ))}
               <tr className="font-bold bg-gray-100">
-                <td className="border p-2 text-right">סה"כ</td>
+                <td className="border p-2 text-right">סכום כולל</td>
                 <td className="border p-2 text-center">100%</td>
                 <td className="border p-2 text-center">-</td>
                 <td className="border p-2 text-center">{totalWeightedScore.toFixed(2)}</td>

@@ -1,8 +1,6 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface CoreZoneStatus {
@@ -11,51 +9,11 @@ interface CoreZoneStatus {
   avgRating: number
   level: 'נמוכה' | 'בינונית' | 'גבוהה'
 }
-// 3. קומפוננטת RenderRadioGroup
-const RenderRadioGroup = ({
+
+const RenderSelect = ({
     value,
     onChange,
     options,
-    name
-  }: {
-    value: string
-    onChange: (value: string) => void
-    options: { value: string; label: string }[]
-    name: string
-    
-  }) => {
-    return (
-      <RadioGroup
-        value={value}
-        onValueChange={onChange}
-        className="space-y-2"
-           dir="rtl"
-      >
-        {options.map((option) => (
-          <div key={option.value} className="relative flex items-center">
-            <RadioGroupItem
-              value={option.value}
-              id={`${name}-${option.value}`}
-              className="peer sr-only"
-            />
-            <Label
-              htmlFor={`${name}-${option.value}`}
-              className="flex w-full cursor-pointer rounded-lg border-2 border-gray-200 p-4 
-                       hover:bg-gray-50 peer-data-[state=checked]:border-blue-500 
-                       peer-data-[state=checked]:bg-blue-50"
-            >
-              {option.label}
-            </Label>
-          </div>
-        ))}
-      </RadioGroup>
-    )
-  }
-  const RenderSelect = ({
-    value,
-    onChange,
-    options,
-    name,
     placeholder
   }: {
     value: string
@@ -65,16 +23,16 @@ const RenderRadioGroup = ({
     placeholder: string
   }) => {
     return (
-      <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="w-full text-right" dir="rtl">
+        <Select value={value} onValueChange={onChange}>
+        <SelectTrigger className="w-full text-right bg-white" dir="rtl">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent dir="rtl">
+        <SelectContent dir="rtl" className="bg-white z-50">
           {options.map((option) => (
             <SelectItem 
               key={option.value} 
               value={option.value}
-              className="text-right"
+              className="text-right hover:bg-gray-100"
             >
               {option.label}
             </SelectItem>
@@ -251,7 +209,7 @@ const PostMappingQuestions = () => {
         <h2 className="text-2xl font-bold mb-6 text-right">שאלות לבירור תנאי היישום</h2>
         
         <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-  <h3 className="text-lg font-semibold mb-4 text-right">1. סוג תמיכה נדרש לביה"ס:</h3>
+  <h3 className="text-lg font-semibold mb-4 text-right">1. סוג תמיכה נדרש לבית הספר:</h3>
   <RenderSelect
     value={supportType}
     onChange={setSupportType}
@@ -287,4 +245,4 @@ const PostMappingQuestions = () => {
   )
 }
 
-export default PostMappingQuestions
+export default PostMappingQuestions;
