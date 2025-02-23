@@ -584,31 +584,31 @@ export function ZoneMapping() {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
-                  {zone.items.map((item) => (
-                    <div key={item.id} className="p-4 border rounded-lg mb-2">
-                      <div className="flex justify-between items-start gap-4">
-                        <div>
-                          <h3 className="font-semibold">{item.title}</h3>
-                          <p className="text-sm text-gray-600">{item.description}</p>
-                        </div>
-                        <div className="flex gap-4">
-                          {[3, 2, 1].map((value) => (
-                            <label key={value} className="flex items-center gap-2">
-                              <input
-                                type="radio"
-                                name={`${zone.id}-${item.id}`}
-                                value={value}
-                                checked={scores[`${zone.id}-${item.id}`] === value.toString()}
-                                onChange={(e) => handleScoreChange(zone.id, item.id, e.target.value)}
-                                className="w-4 h-4"
-                              />
-                              <span>{value}</span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                {zone.items.map((item) => (
+                <div key={item.id} className="p-2 border rounded-lg mb-1">
+                <div className="flex justify-between items-center">
+                <div className="flex-grow pr-2">
+                <h3 className="font-semibold text-sm">{item.title}</h3>
+               <p className="text-xs text-gray-600">{item.description}</p>
+                </div>
+              <div className="flex items-center space-x-2">
+                {[3, 2, 1].map((value) => (
+               <label key={value} className="flex items-center space-x-1">
+                   <input
+              type="radio"
+              name={`${zone.id}-${item.id}`}
+              value={value}
+              checked={scores[`${zone.id}-${item.id}`] === value.toString()}
+              onChange={(e) => handleScoreChange(zone.id, item.id, e.target.value)}
+              className="w-2 h-2"
+            />
+            <span className="text-sm">{value}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  </div>
+))}
                 </AccordionContent>
               </AccordionItem>
             ))}
