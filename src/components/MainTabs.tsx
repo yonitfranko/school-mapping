@@ -3,8 +3,7 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";  // הוספת ייבוא
-
+import { Button } from "@/components/ui/button";
 
 // ייבוא הקומפוננטות מתיקיית school
 import SchoolDetails from '@/components/school/SchoolDetails';
@@ -15,11 +14,10 @@ import MentoringModels from '@/components/school/MentoringModels';
 import DecisionAppendixRatingSystem from '@/components/school/DecisionAppendixRatingSystem';
 import TrackingForm from '@/components/school/TrackingForm';
 
-
-    const handleSaveAllData = () => {
-      // בהמשך נוסיף כאן את הלוגיקה של השמירה ל-Supabase
-      alert('בקרוב: שמירת נתונים למסד הנתונים');
-    };
+const handleSaveAllData = () => {
+  // בהמשך נוסיף כאן את הלוגיקה של השמירה ל-Supabase
+  alert('בקרוב: שמירת נתונים למסד הנתונים');
+};
     
 const MainTabs = () => {
   return (
@@ -29,26 +27,41 @@ const MainTabs = () => {
       </h1>
       
       <Tabs defaultValue="part-a" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 mb-6">
-          <TabsTrigger value="part-e" className="text-right">
+        <TabsList className="grid w-full grid-cols-5 mb-6 bg-white">
+          <TabsTrigger 
+            value="part-e" 
+            className="text-right hover:bg-[#cceef5] data-[state=active]:bg-[#cceef5]"
+          >
             מעקב ובקרה
           </TabsTrigger>
-          <TabsTrigger value="part-d" className="text-right">
+          <TabsTrigger 
+            value="part-d" 
+            className="text-right hover:bg-[#cceef5] data-[state=active]:bg-[#cceef5]"
+          >
             מודלי חניכה
           </TabsTrigger>
-          <TabsTrigger value="part-c" className="text-right">
+          <TabsTrigger 
+            value="part-c" 
+            className="text-right hover:bg-[#cceef5] data-[state=active]:bg-[#cceef5]"
+          >
             חישובים ושאלות
           </TabsTrigger>
-          <TabsTrigger value="part-b" className="text-right">
+          <TabsTrigger 
+            value="part-b" 
+            className="text-right hover:bg-[#cceef5] data-[state=active]:bg-[#cceef5]"
+          >
             מיפוי זירות
           </TabsTrigger>
-          <TabsTrigger value="part-a" className="text-right">
+          <TabsTrigger 
+            value="part-a" 
+            className="text-right hover:bg-[#cceef5] data-[state=active]:bg-[#cceef5]"
+          >
             פרטי בית ספר
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="part-a">
-          <Card className="bg-white">
+          <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardContent className="pt-6">
               <h2 className="text-2xl font-bold mb-6 text-right" style={{ color: '#0064ff' }}>
                 חלק א׳ - פרטי בית הספר
@@ -59,7 +72,7 @@ const MainTabs = () => {
         </TabsContent>
 
         <TabsContent value="part-b">
-          <Card className="bg-white">
+          <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardContent className="pt-6">
               <h2 className="text-2xl font-bold mb-6 text-right" style={{ color: '#0064ff' }}>
                 חלק ב׳ - מיפוי זירות ואתגרים
@@ -70,7 +83,7 @@ const MainTabs = () => {
         </TabsContent>
 
         <TabsContent value="part-c">
-          <Card className="bg-white">
+          <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardContent className="pt-6">
               <div className="space-y-8">
                 <div>
@@ -99,7 +112,7 @@ const MainTabs = () => {
         </TabsContent>
 
         <TabsContent value="part-d">
-          <Card className="bg-white">
+          <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardContent className="pt-6">
               <h2 className="text-2xl font-bold mb-6 text-right" style={{ color: '#0064ff' }}>
                 חלק ו׳ - מודלי חניכה מומלצים
@@ -110,7 +123,7 @@ const MainTabs = () => {
         </TabsContent>
 
         <TabsContent value="part-e">
-          <Card className="bg-white">
+          <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardContent className="pt-6">
               <h2 className="text-2xl font-bold mb-6 text-right" style={{ color: '#0064ff' }}>
                 מעקב ובקרה
