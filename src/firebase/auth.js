@@ -7,8 +7,8 @@ import {
   } from "firebase/auth";
   import { 
     doc, 
+    // הסר את getDoc אם לא משתמשים בו
     setDoc, 
-    getDoc, 
     collection, 
     query, 
     where, 

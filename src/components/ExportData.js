@@ -1,12 +1,12 @@
 // src/components/ExportData.js
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react'; // הסר את useEffect אם לא משתמשים בו
 import { useAuth } from '../contexts/AuthContext';
-import { getOrganizationData } from '../firebase/firestore';
+// הסר את הייבוא של getOrganizationData אם לא משתמשים בו
 import { exportToCSV, exportToJSON } from '../firebase/exportData';
 
 function ExportData() {
   const { userDetails } = useAuth();
-  const [collections, setCollections] = useState(['forms', 'inspections', 'reports']);
+  const [collections] = useState(['forms', 'inspections', 'reports']); // הסר את setCollections אם לא משתמשים בו
   const [selectedCollection, setSelectedCollection] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
