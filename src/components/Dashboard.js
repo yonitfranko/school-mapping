@@ -1,4 +1,4 @@
-// src/components/Dashboard.js
+//src/components/Dashboard.js
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { getOrganizationData } from '../firebase/firestore';
@@ -99,5 +99,3 @@ function Dashboard() {
     </div>
   );
 }
-
-export default Dashboard;

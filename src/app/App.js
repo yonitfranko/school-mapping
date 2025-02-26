@@ -45,11 +45,14 @@ function App() {
           <Route path="/login" element={<Login />} />
           
           {/* נתיבים מוגנים */}
+
           <Route path="/" element={
             <PrivateRoute>
               <Dashboard />
             </PrivateRoute>
           } />
+
+        
           <Route path="/export" element={
             <PrivateRoute>
               <ExportData />
