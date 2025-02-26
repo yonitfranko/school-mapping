@@ -1,13 +1,14 @@
 // src/app/page.tsx
 "use client"
 
-import { useEffect, useState } from 'react';
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import MainTabs from '@/components/MainTabs';
 import { getDocumentById } from '@/firebase/firestore';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
-export default function Home() {
+function HomeContent() {
   const searchParams = useSearchParams();
   const formId = searchParams.get('id');
   const isNew = searchParams.get('new');
@@ -84,5 +85,13 @@ export default function Home() {
         <MainTabs formId={formId} />
       )}
     </main>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <HomeContent />
+    </Suspense>
   );
 }
