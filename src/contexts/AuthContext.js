@@ -1,24 +1,42 @@
 // src/contexts/AuthContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { onAuthChange, getUserDetails } from '../firebase/auth';
+import { auth, db } from '../firebase/config';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 
-// יצירת הקונטקסט
 const AuthContext = createContext();
 
-// שימוש בקונטקסט
-export const useAuth = () => {
+export function useAuth() {
   return useContext(AuthContext);
-};
+}
 
-// ספק הקונטקסט
-export const AuthProvider = ({ children }) => {
+export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [userDetails, setUserDetails] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // פונקציה לקבלת פרטי המשתמש מ-Firestore
+  async function getUserDetails(uid) {
+    try {
+      // חיפוש המשתמש לפי uid
+      const q = query(collection(db, "users"), where("uid", "==", uid));
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        const userDoc = querySnapshot.docs[0];
+        return { id: userDoc.id, ...userDoc.data() };
+      }
+      
+      return null;
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+      return null;
+    }
+  }
+
   useEffect(() => {
-    // האזנה לשינויים במצב ההתחברות
-    const unsubscribe = onAuthChange(async (user) => {
+    // מעקב אחר שינויים במצב ההתחברות
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
       
       if (user) {
@@ -32,22 +50,18 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     });
 
-    // ניקוי האזנה בעת עזיבת הקומפוננטה
     return unsubscribe;
   }, []);
 
-  // הערכים שיהיו זמינים לכל הקומפוננטות דרך הקונטקסט
   const value = {
     currentUser,
     userDetails,
-    isAdmin: userDetails?.role === 'admin',
-    organizationId: userDetails?.organizationId,
     loading
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
-};
+}

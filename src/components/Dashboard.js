@@ -44,7 +44,7 @@ function Dashboard() {
     }
 
     loadStats();
-  }, [userDetails]);
+  }, [userDetails?.organizationId]); // תלות מעודכנת
 
   return (
     <div className="container mt-4" dir="rtl">
@@ -99,3 +99,5 @@ function Dashboard() {
     </div>
   );
 }
+
+export default Dashboard;

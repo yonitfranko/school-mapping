@@ -1,7 +1,11 @@
 // src/components/Login.js
-import React, { useState } from 'react';
-import { loginUser } from '../firebase/auth';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { auth } from '../firebase/config';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../firebase/config';
+import { useAuth } from '../contexts/AuthContext';
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -9,35 +13,53 @@ function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
 
-  const handleSubmit = async (e) => {
+  // אם המשתמש כבר מחובר, הפנה לדף הבית
+  useEffect(() => {
+    if (currentUser) {
+      navigate('/');
+    }
+  }, [currentUser, navigate]);
+
+  async function handleSubmit(e) {
     e.preventDefault();
     
     try {
       setError('');
       setLoading(true);
       
-      const result = await loginUser(email, password);
+      // התחברות דרך Firebase Authentication
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
       
-      if (result.success) {
+      // חפש את פרטי המשתמש ב-Firestore
+      const q = query(collection(db, "users"), where("uid", "==", user.uid));
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        // המשתמש קיים ב-Firestore
         navigate('/');
       } else {
-        setError(result.error || 'שגיאה בהתחברות');
+        // המשתמש לא קיים ב-Firestore
+        setError('חשבון לא מורשה');
+        await auth.signOut();
       }
     } catch (error) {
-      setError('שגיאה בהתחברות: ' + error.message);
+      console.error("שגיאת התחברות:", error);
+      setError('שגיאה בהתחברות. נא לבדוק את הפרטים שהוזנו.');
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   return (
     <div className="container mt-5" dir="rtl">
       <div className="row justify-content-center">
         <div className="col-md-6">
-          <div className="card">
+          <div className="card shadow">
             <div className="card-header bg-primary text-white">
-              <h3 className="mb-0">התחברות</h3>
+              <h3 className="mb-0">התחברות למערכת</h3>
             </div>
             <div className="card-body">
               {error && <div className="alert alert-danger">{error}</div>}
@@ -67,8 +89,12 @@ function Login() {
                   />
                 </div>
                 
-                <button type="submit" className="btn btn-primary w-100" disabled={loading}>
-                  {loading ? 'מתחבר...' : 'התחבר'}
+                <button 
+                  type="submit" 
+                  className="btn btn-primary w-100" 
+                  disabled={loading}
+                >
+                  {loading ? 'מתחבר...' : 'התחברות'}
                 </button>
               </form>
             </div>

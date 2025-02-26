@@ -4,11 +4,9 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { addData } from '@/firebase/firestore'; // ייבוא חדש
-import { useAuth } from '@/contexts/AuthContext'; // ייבוא חדש
+import { addData, updateDocument } from '@/firebase/firestore'; // עדכון הייבוא
+import { useAuth } from '@/contexts/AuthContext';
 import FinalSummary from '@/components/school/FinalSummary';
-
-
 
 // ייבוא הקומפוננטות מתיקיית school
 import SchoolDetails from '@/components/school/SchoolDetails';
@@ -19,7 +17,7 @@ import MentoringModels from '@/components/school/MentoringModels';
 import DecisionAppendixRatingSystem from '@/components/school/DecisionAppendixRatingSystem';
 import TrackingForm from '@/components/school/TrackingForm';
     
-const MainTabs = () => {
+const MainTabs = ({ formId }) => {
   // בדיקה האם useAuth קיים
   let userDetails = null;
   try {
@@ -42,6 +40,9 @@ const MainTabs = () => {
       const mentoringModels = JSON.parse(localStorage.getItem('mentoringModels') || '{}');
       const decisionAppendix = JSON.parse(localStorage.getItem('decisionAppendix') || '{}');
       const trackingForm = JSON.parse(localStorage.getItem('trackingForm') || '{}');
+      const finalCheck = JSON.parse(localStorage.getItem('finalCheck') || '{}');
+      const selectedModels = JSON.parse(localStorage.getItem('selectedModels') || '[]');
+      const finalDecision = JSON.parse(localStorage.getItem('finalDecision') || '{}');
 
       // הכן את הנתונים לשמירה
       const formData = {
@@ -52,13 +53,23 @@ const MainTabs = () => {
         mentoringModels,
         decisionAppendix,
         trackingForm,
+        finalCheck,
+        selectedModels,
+        finalDecision,
         name: schoolDetails.schoolName || 'מיפוי בית ספר',
         isActive: true,
         updatedAt: new Date()
       };
 
-      // שמירה ל-Firestore
-      const result = await addData('forms', formData, organizationId);
+      let result;
+      
+      if (formId) {
+        // עדכון טופס קיים
+        result = await updateDocument('forms', formId, formData);
+      } else {
+        // הוספת טופס חדש
+        result = await addData('forms', formData, organizationId);
+      }
 
       if (result.success) {
         alert('הנתונים נשמרו בהצלחה!');
@@ -79,7 +90,13 @@ const MainTabs = () => {
       </h1>
       
       <Tabs defaultValue="part-a" className="w-full">
-      <TabsList className="grid w-full grid-cols-5 mb-6 bg-white">
+        <TabsList className="grid w-full grid-cols-6 mb-6 bg-white">
+          <TabsTrigger 
+            value="part-f" 
+            className="text-right hover:bg-[#cceef5] data-[state=active]:bg-[#cceef5]"
+          >
+            סיכום והחלטה
+          </TabsTrigger>
           <TabsTrigger 
             value="part-e" 
             className="text-right hover:bg-[#cceef5] data-[state=active]:bg-[#cceef5]"
@@ -95,7 +112,6 @@ const MainTabs = () => {
           <TabsTrigger 
             value="part-c" 
             className="text-right hover:bg-[#cceef5] data-[state=active]:bg-[#cceef5]"
-            
           >
             חישובים ושאלות
           </TabsTrigger>
@@ -110,12 +126,6 @@ const MainTabs = () => {
             className="text-right hover:bg-[#cceef5] data-[state=active]:bg-[#cceef5]"
           >
             פרטי בית ספר
-          </TabsTrigger>
-          <TabsTrigger 
-         value="part-f" 
-           className="text-right hover:bg-[#cceef5] data-[state=active]:bg-[#cceef5]"
->
-           סיכום והחלטה
           </TabsTrigger>
         </TabsList>
 
@@ -185,42 +195,26 @@ const MainTabs = () => {
           <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardContent className="pt-6">
               <h2 className="text-2xl font-bold mb-6 text-right" style={{ color: '#0064ff' }}>
-              <TabsContent value="part-d">
-  <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
-    <CardContent className="pt-6">
-      <h2 className="text-2xl font-bold mb-6 text-right" style={{ color: '#0064ff' }}>
-        חלק ו׳ - מודלי חניכה מומלצים
-      </h2>
-      <MentoringModels />
-      
-      {/* הוספת הסיכום מתחת למודלי החניכה */}
-      <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-6 text-right" style={{ color: '#0064ff' }}>
-          סיכום והחלטה סופית
-        </h2>
-        <FinalSummary />
-      </div>
-    </CardContent>
-  </Card>
-</TabsContent>
                 מעקב ובקרה
               </h2>
               <TrackingForm />
             </CardContent>
           </Card>
         </TabsContent>
+        
         <TabsContent value="part-f">
-  <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
-    <CardContent className="pt-6">
-      <h2 className="text-2xl font-bold mb-6 text-right" style={{ color: '#0064ff' }}>
-        חלק ז׳ - סיכום והחלטה
-      </h2>
-      <FinalSummary />
-    </CardContent>
-  </Card>
-</TabsContent>
+          <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
+            <CardContent className="pt-6">
+              <h2 className="text-2xl font-bold mb-6 text-right" style={{ color: '#0064ff' }}>
+                חלק ז׳ - סיכום והחלטה
+              </h2>
+              <FinalSummary />
+            </CardContent>
+          </Card>
+          </TabsContent>
       </Tabs>
-            <div className="fixed bottom-4 left-4">
+      
+      <div className="fixed bottom-4 left-4">
         <Button 
           onClick={handleSaveAllData}
           className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"

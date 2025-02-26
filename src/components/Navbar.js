@@ -2,27 +2,27 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { logoutUser } from '../firebase/auth';
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebase/config';
 
 function Navbar() {
-  const { currentUser, userDetails, isAdmin } = useAuth();
+  const { currentUser, userDetails } = useAuth();
   const navigate = useNavigate();
+  const isAdmin = userDetails?.role === 'admin';
 
-  const handleLogout = async () => {
+  async function handleLogout() {
     try {
-      await logoutUser();
+      await signOut(auth);
       navigate('/login');
     } catch (error) {
       console.error("שגיאה בהתנתקות:", error);
     }
-  };
-
-  if (!currentUser) return null;
+  }
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-primary" dir="rtl">
       <div className="container">
-        <Link className="navbar-brand" to="/">מערכת ניהול בתי ספר</Link>
+        <Link className="navbar-brand" to="/">מערכת מיפוי בתי ספר</Link>
         
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span className="navbar-toggler-icon"></span>
@@ -43,15 +43,20 @@ function Navbar() {
             </li>
             
             {isAdmin && (
-              <li className="nav-item">
-                <Link className="nav-link" to="/migrate">מיגרציית נתונים</Link>
-              </li>
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/migrate">מיגרציית נתונים</Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/register">רישום משתמשים</Link>
+                </li>
+              </>
             )}
           </ul>
           
           <div className="d-flex align-items-center">
             <span className="text-white me-3">
-              {userDetails?.email} | {userDetails?.role === 'admin' ? 'מנהל' : 'מפקח'}
+              {userDetails?.email} | {isAdmin ? 'מנהל' : 'מפקח'}
             </span>
             <button className="btn btn-outline-light" onClick={handleLogout}>התנתק</button>
           </div>
