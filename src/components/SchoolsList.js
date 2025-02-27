@@ -24,26 +24,59 @@ const SchoolsList = () => {
         const result = await getOrganizationData('forms', organizationId);
         
         if (result.success) {
+          console.log("Data received from Firestore:", result.data);
+          
           // יצירת רשימה מסוננת של בתי ספר עם הסרת כפילויות
           const schoolsMap = {};
           result.data.forEach(form => {
-            const schoolName = form.schoolDetails?.schoolName || form.name || 'בית ספר ללא שם';
+            // בדיקה שהמסמך כולל שם (שעשוי להיות בשדה name)
+            const schoolName = form.name || 'בית ספר ללא שם';
             const schoolId = form.id;
             
+            // הוספת בדיקות בטיחות לתאריכי העדכון
+            let formUpdatedAt, existingUpdatedAt;
+            
+            // בדיקה אם form.updatedAt זה timestamp של Firebase
+            if (form.updatedAt && typeof form.updatedAt.toDate === 'function') {
+              formUpdatedAt = form.updatedAt.toDate();
+            } else if (form.updatedAt instanceof Date) {
+              formUpdatedAt = form.updatedAt;
+            } else if (form.updatedAt) {
+              // אם זה מחרוזת או משהו אחר, ננסה להמיר ל-Date
+              formUpdatedAt = new Date(form.updatedAt);
+            } else {
+              // אם אין updatedAt, נשתמש בתאריך הנוכחי
+              formUpdatedAt = new Date();
+            }
+            
+            // בדיקה דומה לתאריך הקיים, אם יש כזה
+            if (schoolsMap[schoolName] && schoolsMap[schoolName].updatedAt) {
+              if (typeof schoolsMap[schoolName].updatedAt.toDate === 'function') {
+                existingUpdatedAt = schoolsMap[schoolName].updatedAt.toDate();
+              } else if (schoolsMap[schoolName].updatedAt instanceof Date) {
+                existingUpdatedAt = schoolsMap[schoolName].updatedAt;
+              } else {
+                existingUpdatedAt = new Date(schoolsMap[schoolName].updatedAt);
+              }
+            }
+            
             // בדיקה אם הטופס הזה כבר קיים ברשימה, והאם הוא חדש יותר
-            if (!schoolsMap[schoolName] || new Date(form.updatedAt.toDate()) > new Date(schoolsMap[schoolName].updatedAt.toDate())) {
+            if (!schoolsMap[schoolName] || !existingUpdatedAt || formUpdatedAt > existingUpdatedAt) {
               schoolsMap[schoolName] = {
                 id: schoolId,
                 name: schoolName,
                 updatedAt: form.updatedAt,
+                schoolcode: form.schoolcode || 'לא ידוע',
                 data: form
               };
             }
           });
           
           const uniqueSchools = Object.values(schoolsMap);
+          console.log("Unique schools found:", uniqueSchools); // הוספת לוג לדיבוג
           setSchools(uniqueSchools);
         } else {
+          console.error("Error from getOrganizationData:", result.error);
           setError('שגיאה בטעינת נתוני בתי הספר');
         }
       } catch (err) {
@@ -65,6 +98,27 @@ const SchoolsList = () => {
   const handleEditSchool = (schoolId) => {
     // ניווט לדף הראשי עם מזהה קיים לעריכה
     router.push(`/?id=${schoolId}`);
+  };
+
+  const formatDate = (dateValue) => {
+    try {
+      // אם זה timestamp של פיירבייס
+      if (dateValue && typeof dateValue.toDate === 'function') {
+        return dateValue.toDate().toLocaleDateString('he-IL');
+      } 
+      // אם זה תאריך רגיל
+      else if (dateValue instanceof Date) {
+        return dateValue.toLocaleDateString('he-IL');
+      } 
+      // אם זה מחרוזת
+      else if (dateValue) {
+        return new Date(dateValue).toLocaleDateString('he-IL');
+      }
+      return 'לא ידוע';
+    } catch (e) {
+      console.error("Error formatting date:", e);
+      return 'לא ידוע';
+    }
   };
 
   return (
@@ -92,7 +146,10 @@ const SchoolsList = () => {
               <CardContent className="p-4">
                 <h3 className="text-lg font-semibold mb-2">{school.name}</h3>
                 <p className="text-sm text-gray-500 mb-3">
-                  עודכן: {school.updatedAt.toDate().toLocaleDateString('he-IL')}
+                  סמל מוסד: {school.schoolcode || 'לא ידוע'}
+                </p>
+                <p className="text-sm text-gray-500 mb-3">
+                  עודכן: {formatDate(school.updatedAt)}
                 </p>
                 <div className="flex justify-end">
                   <Button 

@@ -6,7 +6,7 @@ export default function SchoolsPage() {
       {/* Using client component for data fetching */}
       <SchoolsList/>
     </main>
-  );
+      );
 }
   
   

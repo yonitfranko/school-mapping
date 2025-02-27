@@ -1,4 +1,3 @@
-// src/app/page.tsx
 "use client"
 
 import { Suspense } from 'react';
@@ -24,11 +23,51 @@ function HomeContent() {
           const result = await getDocumentById('forms', formId);
           
           if (result.success) {
-            // טעינת הנתונים ללוקל סטורג' כדי שהטופס יוכל להשתמש בהם
+            console.log("Raw form data from Firestore:", result.data);
             const data = result.data;
             
-            // שמירת כל חלק בנפרד בלוקל סטורג'
-            if (data.schoolDetails) localStorage.setItem('schoolDetails', JSON.stringify(data.schoolDetails));
+            // יצירת אובייקט schoolDetails מהנתונים השטוחים
+            const schoolDetails = {
+              schoolName: data.name || '',
+              schoolSymbol: data.schoolcode || '',
+              educationStage: data.educationStage || ''
+            };
+            
+            // יצירת מבנה תלמידים אם קיים
+            if (data.students) {
+              const studentsData = {
+                regularStudents: data.students.regular || '',
+                specialEdStudents: data.students.specialEd || '',
+                differentialStudents: data.students.differential || ''
+              };
+              
+              // הוספת נתוני תלמידים לאובייקט schoolDetails
+              Object.assign(schoolDetails, studentsData);
+            }
+            
+            // יצירת מבנה מורים אם קיים
+            if (data.teachers) {
+              const teachersData = {
+                teachersExp1to5: data.teachers.exp1to5 || '',
+                teachersExp5to10: data.teachers.exp5to10 || '',
+                teachersExp10Plus: data.teachers.exp10Plus || ''
+              };
+              
+              // הוספת נתוני מורים לאובייקט schoolDetails
+              Object.assign(schoolDetails, teachersData);
+            }
+            
+            // שמירה ב-localStorage
+            console.log("Saving schoolDetails to localStorage:", schoolDetails);
+            localStorage.setItem('schoolDetails', JSON.stringify(schoolDetails));
+            
+            // אם יש גם נתונים מובנים, השתמש בהם
+            if (data.schoolDetails) {
+              console.log("Original schoolDetails structure found:", data.schoolDetails);
+              localStorage.setItem('originalSchoolDetails', JSON.stringify(data.schoolDetails));
+            }
+            
+            // העתקת שאר הנתונים כפי שהם (אם קיימים)
             if (data.ratingSystem) localStorage.setItem('ratingSystem', JSON.stringify(data.ratingSystem));
             if (data.postMappingQuestions) localStorage.setItem('postMappingQuestions', JSON.stringify(data.postMappingQuestions));
             if (data.weightsCalculator) localStorage.setItem('weightsCalculator', JSON.stringify(data.weightsCalculator));
