@@ -1,4 +1,3 @@
-// src/firebase/firestore.js
 import { 
   collection, 
   addDoc, 
@@ -8,6 +7,7 @@ import {
   doc,
   getDoc,
   updateDoc,
+  deleteDoc,  // הוסף את זה אם לא קיים
   orderBy,
   limit
 } from "firebase/firestore";
@@ -89,6 +89,18 @@ export const updateDocument = async (collectionName, docId, data) => {
     return { success: true };
   } catch (error) {
     console.error(`Error updating document in ${collectionName}:`, error);
+    return { success: false, error: error.message };
+  }
+};
+
+// פונקציה למחיקת מסמך
+export const deleteDocument = async (collectionName, docId) => {
+  try {
+    const docRef = doc(db, collectionName, docId);
+    await deleteDoc(docRef);
+    return { success: true };
+  } catch (error) {
+    console.error(`Error deleting document from ${collectionName}:`, error);
     return { success: false, error: error.message };
   }
 };

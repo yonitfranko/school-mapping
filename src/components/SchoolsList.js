@@ -2,7 +2,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { getOrganizationData } from '@/firebase/firestore';
+import { getOrganizationData, deleteDocument } from '@/firebase/firestore';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
@@ -90,6 +90,29 @@ const SchoolsList = () => {
     loadSchools();
   }, [organizationId]);
 
+  // פונקציית המחיקה צריכה להיות כאן, מחוץ ל-useEffect
+  const handleDeleteSchool = async (schoolId, schoolName) => {
+    // אישור לפני מחיקה
+    if (!confirm(`האם אתה בטוח שברצונך למחוק את בית הספר "${schoolName}"?`)) {
+      return; // המשתמש ביטל את המחיקה
+    }
+    
+    try {
+      const result = await deleteDocument('forms', schoolId);
+      
+      if (result.success) {
+        // עדכון הרשימה המקומית כדי להסיר את בית הספר שנמחק
+        setSchools(prevSchools => prevSchools.filter(school => school.id !== schoolId));
+        alert(`בית הספר "${schoolName}" נמחק בהצלחה`);
+      } else {
+        alert(`שגיאה במחיקת בית הספר: ${result.error}`);
+      }
+    } catch (error) {
+      console.error("שגיאה במחיקת בית הספר:", error);
+      alert("שגיאה במחיקת בית הספר");
+    }
+  };
+
   const handleNewSchool = () => {
     // ניווט לדף הראשי עם מזהה חדש שיאותת ליצירת טופס חדש
     router.push('/?new=true');
@@ -125,7 +148,7 @@ const SchoolsList = () => {
     <div className="container mx-auto p-4" dir="rtl">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold" style={{ color: '#0064ff' }}>רשימת בתי ספר</h1>
-        <Button onClick={handleNewSchool} className="bg-green-600 hover:bg-green-700">
+        <Button onClick={handleNewSchool} className="bg-sky-400 hover:bg-sky-700">
           + הוסף בית ספר חדש
         </Button>
       </div>
@@ -151,10 +174,17 @@ const SchoolsList = () => {
                 <p className="text-sm text-gray-500 mb-3">
                   עודכן: {formatDate(school.updatedAt)}
                 </p>
-                <div className="flex justify-end">
+                <div className="flex justify-end space-x-2">
+                  <Button 
+                    onClick={() => handleDeleteSchool(school.id, school.name)} 
+                    className="bg-rose-400 hover:bg-rose-600 ml-2"
+                    variant="destructive"
+                  >
+                    מחק
+                  </Button>
                   <Button 
                     onClick={() => handleEditSchool(school.id)} 
-                    className="bg-blue-600 hover:bg-blue-700"
+                     className="bg-gray-400 hover:bg-gray-600"
                   >
                     ערוך מיפוי
                   </Button>
