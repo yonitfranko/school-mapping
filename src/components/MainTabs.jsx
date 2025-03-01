@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { addData, updateDocument } from '@/firebase/firestore'; // עדכון הייבוא
 import { useAuth } from '@/contexts/AuthContext';
 import FinalSummary from '@/components/school/FinalSummary';
+import { useRouter } from 'next/navigation';
 
 // ייבוא הקומפוננטות מתיקיית school
 import SchoolDetails from '@/components/school/SchoolDetails';
@@ -19,6 +20,7 @@ import TrackingForm from '@/components/school/TrackingForm';
     
 const MainTabs = ({ formId }) => {
   // בדיקה האם useAuth קיים
+  const router = useRouter();
   let userDetails = null;
   try {
     const auth = useAuth();
@@ -220,15 +222,21 @@ const MainTabs = ({ formId }) => {
         </TabsContent>
       </Tabs>
       
-        <div className="fixed bottom-4 left-4">
-        <Button 
-          onClick={handleSaveAllData}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
-        >
-          שמור את כל הנתונים
-        </Button>
-      </div>
-    </div>
+      <div className="fixed bottom-4 left-4 flex gap-2">
+  <Button 
+    onClick={handleSaveAllData}
+    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
+  >
+    שמור את כל הנתונים
+  </Button>
+  <Button 
+    onClick={() => router.push('/export')}
+    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2"
+  >
+    ייצא לאקסל
+  </Button>
+</div>
+           </div>
   );
 };
 
