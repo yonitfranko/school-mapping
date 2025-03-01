@@ -7,49 +7,56 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { logoutUser } from '@/firebase/auth'; // ייבוא פונקציית ההתנתקות
 
 const SchoolsList = () => {
+  const { userDetails } = useAuth();
+  // קבלת הארגון מפרטי המשתמש במקום קבוע
+  const organizationId = userDetails?.organizationId || "org1";
+
   const [schools, setSchools] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const router = useRouter();
-  
-  // השג את הארגון כרגע בצורה קבועה, בהמשך נקבל אותו מהתחברות המשתמש
-  const organizationId = "org1";
-
+ 
   useEffect(() => {
     async function loadSchools() {
       try {
         setLoading(true);
-        const result = await getOrganizationData('forms', organizationId);
         
-        if (result.success) {
-          console.log("Data received from Firestore:", result.data);
+        const userOrgs = userDetails?.organizationId || ["org1"];
+        let allSchools = [];
+        
+        // טעינת בתי ספר מכל ארגון
+        for (const org of userOrgs) {
+          const result = await getOrganizationData('forms', org);
           
-          // יצירת רשימה מסוננת של בתי ספר עם הסרת כפילויות
+          if (result.success) {
+            allSchools = [...allSchools, ...result.data];
+          }
+        }
+        
+        // בדיקה אם יש בתי ספר
+        if (allSchools.length > 0) {
           const schoolsMap = {};
-          result.data.forEach(form => {
-            // בדיקה שהמסמך כולל שם (שעשוי להיות בשדה name)
+          allSchools.forEach(form => {
             const schoolName = form.name || 'בית ספר ללא שם';
             const schoolId = form.id;
             
-            // הוספת בדיקות בטיחות לתאריכי העדכון
+            // יתר הלוגיקה נשארת זהה
             let formUpdatedAt, existingUpdatedAt;
             
-            // בדיקה אם form.updatedAt זה timestamp של Firebase
             if (form.updatedAt && typeof form.updatedAt.toDate === 'function') {
               formUpdatedAt = form.updatedAt.toDate();
             } else if (form.updatedAt instanceof Date) {
               formUpdatedAt = form.updatedAt;
             } else if (form.updatedAt) {
-              // אם זה מחרוזת או משהו אחר, ננסה להמיר ל-Date
               formUpdatedAt = new Date(form.updatedAt);
             } else {
-              // אם אין updatedAt, נשתמש בתאריך הנוכחי
               formUpdatedAt = new Date();
             }
             
-            // בדיקה דומה לתאריך הקיים, אם יש כזה
             if (schoolsMap[schoolName] && schoolsMap[schoolName].updatedAt) {
               if (typeof schoolsMap[schoolName].updatedAt.toDate === 'function') {
                 existingUpdatedAt = schoolsMap[schoolName].updatedAt.toDate();
@@ -60,7 +67,6 @@ const SchoolsList = () => {
               }
             }
             
-            // בדיקה אם הטופס הזה כבר קיים ברשימה, והאם הוא חדש יותר
             if (!schoolsMap[schoolName] || !existingUpdatedAt || formUpdatedAt > existingUpdatedAt) {
               schoolsMap[schoolName] = {
                 id: schoolId,
@@ -73,11 +79,12 @@ const SchoolsList = () => {
           });
           
           const uniqueSchools = Object.values(schoolsMap);
-          console.log("Unique schools found:", uniqueSchools); // הוספת לוג לדיבוג
+          console.log("Unique schools found:", uniqueSchools);
           setSchools(uniqueSchools);
         } else {
-          console.error("Error from getOrganizationData:", result.error);
-          setError('שגיאה בטעינת נתוני בתי הספר');
+          // במקרה ואין בתי ספר
+          setSchools([]);
+          console.log("No schools found");
         }
       } catch (err) {
         console.error("שגיאה בטעינת רשימת בתי הספר:", err);
@@ -89,6 +96,21 @@ const SchoolsList = () => {
     
     loadSchools();
   }, [organizationId]);
+
+  // פונקציה לטיפול בהתנתקות
+  const handleLogout = async () => {
+    try {
+      const result = await logoutUser();
+      if (result.success) {
+        router.push('/login'); // ניווט למסך ההתחברות
+      } else {
+        setError('שגיאה בהתנתקות: ' + result.error);
+      }
+    } catch (error) {
+      console.error("שגיאה בהתנתקות:", error);
+      setError('שגיאה בהתנתקות: ' + error.message);
+    }
+  };
 
   // פונקציית המחיקה צריכה להיות כאן, מחוץ ל-useEffect
   const handleDeleteSchool = async (schoolId, schoolName) => {
@@ -147,7 +169,16 @@ const SchoolsList = () => {
   return (
     <div className="container mx-auto p-4" dir="rtl">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold" style={{ color: '#0064ff' }}>רשימת בתי ספר</h1>
+        <div className="flex items-center">
+          <h1 className="text-2xl font-bold" style={{ color: '#0064ff' }}>רשימת בתי ספר</h1>
+          <Button 
+            onClick={handleLogout} 
+            className="bg-gray-200 hover:bg-gray-300 text-gray-800 mr-4"
+            variant="outline"
+          >
+            התנתק
+          </Button>
+        </div>
         <Button onClick={handleNewSchool} className="bg-sky-400 hover:bg-sky-700">
           + הוסף בית ספר חדש
         </Button>

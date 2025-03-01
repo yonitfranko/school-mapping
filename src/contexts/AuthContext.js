@@ -1,8 +1,12 @@
 // src/contexts/AuthContext.js
+"use client"
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth, db } from '../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+
 
 const AuthContext = createContext();
 
@@ -52,10 +56,25 @@ export function AuthProvider({ children }) {
 
     return unsubscribe;
   }, []);
+  async function login(email, password) {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      return { success: true, user: userCredential.user };
+    } catch (error) {
+      console.error("Error signing in:", error);
+      return { success: false, error: error.message };
+    }
+  }
+  
+  function logout() {
+    return signOut(auth);
+  }
 
   const value = {
     currentUser,
     userDetails,
+    login,
+    logout,
     loading
   };
 

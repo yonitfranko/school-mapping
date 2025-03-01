@@ -2,9 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { getOrganizationData } from '../firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+import { logoutUser } from '../firebase/auth';
 
 function Dashboard() {
   const { userDetails } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     forms: 0,
     inspections: 0,
@@ -46,9 +49,32 @@ function Dashboard() {
     loadStats();
   }, [userDetails?.organizationId]); // תלות מעודכנת
 
+  // פונקציה לטיפול בהתנתקות
+  const handleLogout = async () => {
+    try {
+      const result = await logoutUser();
+      if (result.success) {
+        navigate('/login'); // ניווט למסך ההתחברות
+      } else {
+        setError('שגיאה בהתנתקות: ' + result.error);
+      }
+    } catch (error) {
+      console.error("שגיאה בהתנתקות:", error);
+      setError('שגיאה בהתנתקות: ' + error.message);
+    }
+  };
+
   return (
     <div className="container mt-4" dir="rtl">
-      <h2>לוח מחוונים</h2>
+      <div className="d-flex justify-content-between align-items-center">
+        <h2>לוח מחוונים</h2>
+        <button 
+          onClick={handleLogout} 
+          className="btn btn-outline-secondary"
+        >
+          חזרה למסך כניסה
+        </button>
+      </div>
       
       {error && <div className="alert alert-danger">{error}</div>}
       

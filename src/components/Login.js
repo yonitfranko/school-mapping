@@ -1,10 +1,7 @@
 // src/components/Login.js
+"use client"
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { auth } from '../firebase/config';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../firebase/config';
+import { useRouter } from 'next/navigation'; // שינוי לניווט של Next.js
 import { useAuth } from '../contexts/AuthContext';
 
 function Login() {
@@ -12,15 +9,15 @@ function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  const router = useRouter(); // שימוש ב-router של Next
+  const { currentUser, login } = useAuth(); // שימוש בפונקציית login מה-context
 
   // אם המשתמש כבר מחובר, הפנה לדף הבית
   useEffect(() => {
     if (currentUser) {
-      navigate('/');
+      router.push('/');
     }
-  }, [currentUser, navigate]);
+  }, [currentUser, router]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -29,21 +26,13 @@ function Login() {
       setError('');
       setLoading(true);
       
-      // התחברות דרך Firebase Authentication
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+      // שימוש בפונקציית login מה-context
+      const result = await login(email, password);
       
-      // חפש את פרטי המשתמש ב-Firestore
-      const q = query(collection(db, "users"), where("uid", "==", user.uid));
-      const querySnapshot = await getDocs(q);
-      
-      if (!querySnapshot.empty) {
-        // המשתמש קיים ב-Firestore
-        navigate('/');
+      if (result.success) {
+        router.push('/');
       } else {
-        // המשתמש לא קיים ב-Firestore
-        setError('חשבון לא מורשה');
-        await auth.signOut();
+        setError('שגיאה בהתחברות: ' + result.error);
       }
     } catch (error) {
       console.error("שגיאת התחברות:", error);

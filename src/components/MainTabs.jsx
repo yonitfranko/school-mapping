@@ -90,13 +90,8 @@ const MainTabs = ({ formId }) => {
       </h1>
       
       <Tabs defaultValue="part-a" className="w-full">
-        <TabsList className="grid w-full grid-cols-6 mb-6 bg-white">
-          <TabsTrigger 
-            value="part-f" 
-            className="text-right hover:bg-[#cceef5] data-[state=active]:bg-[#cceef5]"
-          >
-            סיכום והחלטה
-          </TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5 mb-6 bg-white">
+          {/* הסרנו טאב אחד והוספנו טאב חדש של "בחירת מודל חניכה" במקום "מודלי חניכה" ו"סיכום והחלטה" */}
           <TabsTrigger 
             value="part-e" 
             className="text-right hover:bg-[#cceef5] data-[state=active]:bg-[#cceef5]"
@@ -107,7 +102,7 @@ const MainTabs = ({ formId }) => {
             value="part-d" 
             className="text-right hover:bg-[#cceef5] data-[state=active]:bg-[#cceef5]"
           >
-            מודלי חניכה
+            בחירת מודל חניכה
           </TabsTrigger>
           <TabsTrigger 
             value="part-c" 
@@ -128,7 +123,8 @@ const MainTabs = ({ formId }) => {
             פרטי בית ספר
           </TabsTrigger>
         </TabsList>
-
+  
+        {/* התוכן של הטאבים */}
         <TabsContent value="part-a">
           <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardContent className="pt-6">
@@ -139,8 +135,9 @@ const MainTabs = ({ formId }) => {
             </CardContent>
           </Card>
         </TabsContent>
-
+  
         <TabsContent value="part-b">
+          {/* תוכן של "מיפוי זירות" נשאר ללא שינוי */}
           <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardContent className="pt-6">
               <h2 className="text-2xl font-bold mb-6 text-right" style={{ color: '#0064ff' }}>
@@ -150,8 +147,9 @@ const MainTabs = ({ formId }) => {
             </CardContent>
           </Card>
         </TabsContent>
-
+  
         <TabsContent value="part-c">
+          {/* תוכן של "חישובים ושאלות" נשאר ללא שינוי */}
           <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardContent className="pt-6">
               <div className="space-y-8">
@@ -168,7 +166,7 @@ const MainTabs = ({ formId }) => {
                   </h2>
                   <PostMappingQuestions />
                 </div>
-
+  
                 <div>
                   <h2 className="text-2xl font-bold mb-6 text-right" style={{ color: '#0064ff' }}>
                     נספח לקבלת החלטה
@@ -179,19 +177,38 @@ const MainTabs = ({ formId }) => {
             </CardContent>
           </Card>
         </TabsContent>
-
+  
         <TabsContent value="part-d">
+          {/* טאב חדש שמשלב את "מודלי חניכה" ו"סיכום והחלטה" */}
           <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardContent className="pt-6">
               <h2 className="text-2xl font-bold mb-6 text-right" style={{ color: '#0064ff' }}>
-                חלק ו׳ - מודלי חניכה מומלצים
+                בחירת מודל חניכה
               </h2>
-              <MentoringModels />
+              
+              <div className="space-y-10">
+                {/* חלק ראשון: מודלי חניכה */}
+                <div>
+                  <h3 className="text-xl font-bold mb-4 text-right">
+                    עיון במודלים
+                  </h3>
+                  <MentoringModels />
+                </div>
+                
+                {/* חלק שני: סיכום והחלטה */}
+                <div className="mt-12 pt-6 border-t border-gray-200">
+                  <h3 className="text-xl font-bold mb-4 text-right">
+                    בחירה וסיכום
+                  </h3>
+                  <FinalSummary />
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
-
+  
         <TabsContent value="part-e">
+          {/* תוכן של "מעקב ובקרה" נשאר ללא שינוי */}
           <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardContent className="pt-6">
               <h2 className="text-2xl font-bold mb-6 text-right" style={{ color: '#0064ff' }}>
@@ -201,20 +218,9 @@ const MainTabs = ({ formId }) => {
             </CardContent>
           </Card>
         </TabsContent>
-        
-        <TabsContent value="part-f">
-          <Card className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
-            <CardContent className="pt-6">
-              <h2 className="text-2xl font-bold mb-6 text-right" style={{ color: '#0064ff' }}>
-                חלק ז׳ - סיכום והחלטה
-              </h2>
-              <FinalSummary />
-            </CardContent>
-          </Card>
-          </TabsContent>
       </Tabs>
       
-      <div className="fixed bottom-4 left-4">
+        <div className="fixed bottom-4 left-4">
         <Button 
           onClick={handleSaveAllData}
           className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
