@@ -78,6 +78,13 @@ const PostMappingQuestions = () => {
   const [teamReadiness, setTeamReadiness] = useState<string>("")
   const [availableResources, setAvailableResources] = useState<string>("")
 
+  // פונקציית עזר להשגת מזהה טופס נוכחי
+  const getCurrentFormId = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const formId = urlParams.get('id');
+    return formId || 'new';
+  }
+
   const getZoneName = (id: string): string => ({
     '1': 'זירה 1: מנהיגות ותרבות בית ספרית',
     '2': 'זירה 2: צוות חינוכי',
@@ -86,11 +93,16 @@ const PostMappingQuestions = () => {
   }[id] || '')
 
   useEffect(() => {
-    const savedRatings = localStorage.getItem('zoneRatings')
-    console.log('Loading ratings:', savedRatings)
+    const formId = getCurrentFormId();
+    // נסה לקרוא מהמקום החדש עם מזהה בית הספר
+    const savedRatings = localStorage.getItem(`zoneRatings_${formId}`)
+    // אם אין במקום החדש, נסה לקרוא מהמקום הישן
+    const oldSavedRatings = !savedRatings ? localStorage.getItem('zoneRatings') : null;
+    
+    console.log('Loading ratings for form', formId, ':', savedRatings || oldSavedRatings)
 
-    if (savedRatings) {
-      const ratings = JSON.parse(savedRatings)
+    if (savedRatings || oldSavedRatings) {
+      const ratings = JSON.parse(savedRatings || oldSavedRatings || '{}')
       
       // מיפוי הזירות
       const zoneMapping: Record<string, string> = {
@@ -154,7 +166,60 @@ const PostMappingQuestions = () => {
 
       setCoreZonesChallenges(challengeZones)
     }
+    
+    // טעינת בחירות משתמש שמורות
+   
+    const savedChoices = localStorage.getItem(`postMappingQuestions_${formId}`);
+    if (savedChoices) {
+      try {
+        const choices = JSON.parse(savedChoices);
+        if (choices.urgencyLevel) setUrgencyLevel(choices.urgencyLevel);
+        if (choices.supportType) setSupportType(choices.supportType);
+        if (choices.teamReadiness) setTeamReadiness(choices.teamReadiness);
+        if (choices.availableResources) setAvailableResources(choices.availableResources);
+      } catch (e) {
+        console.error("Error parsing saved choices:", e);
+      }
+    }
   }, [])
+  
+  // שמירת בחירות המשתמש
+  const saveUserChoices = (field: string, value: string) => {
+    const formId = getCurrentFormId();
+    // טעינת נתונים קיימים
+    const savedChoices = localStorage.getItem(`postMappingQuestions_${formId}`);
+    const choices = savedChoices ? JSON.parse(savedChoices) : {};
+    
+    // עדכון השדה הרלוונטי
+    choices[field] = value;
+    
+    // שמירה בחזרה ב-localStorage
+    localStorage.setItem(`postMappingQuestions_${formId}`, JSON.stringify(choices));
+    
+    // שמירה גם במפתח הישן לתאימות לאחור
+    localStorage.setItem('postMappingQuestions', JSON.stringify(choices));
+  }
+  
+  // עדכון פונקציות ה-setter עם שמירה
+  const updateUrgencyLevel = (value: string) => {
+    setUrgencyLevel(value);
+    saveUserChoices('urgencyLevel', value);
+  };
+  
+  const updateSupportType = (value: string) => {
+    setSupportType(value);
+    saveUserChoices('supportType', value);
+  };
+  
+  const updateTeamReadiness = (value: string) => {
+    setTeamReadiness(value);
+    saveUserChoices('teamReadiness', value);
+  };
+  
+  const updateAvailableResources = (value: string) => {
+    setAvailableResources(value);
+    saveUserChoices('availableResources', value);
+  };
 
   return (
     <div className="space-y-8 p-4" dir="rtl">
@@ -197,7 +262,7 @@ const PostMappingQuestions = () => {
   <h3 className="text-lg font-semibold mb-4 text-right">3. רמת הדחיפות לטיפול באתגרים שזוהו:</h3>
   <RenderSelect
     value={urgencyLevel}
-    onChange={setUrgencyLevel}
+    onChange={updateUrgencyLevel}
     options={urgencyOptions}
     name="urgency"
     placeholder="בחר רמת דחיפות"
@@ -212,7 +277,7 @@ const PostMappingQuestions = () => {
   <h3 className="text-lg font-semibold mb-4 text-right">1. סוג תמיכה נדרש לבית הספר:</h3>
   <RenderSelect
     value={supportType}
-    onChange={setSupportType}
+    onChange={updateSupportType}
     options={supportTypeOptions}
     name="support"
     placeholder="בחר סוג תמיכה"
@@ -224,7 +289,7 @@ const PostMappingQuestions = () => {
   <h3 className="text-lg font-semibold mb-4 text-right">2. רמת המוכנות של הצוות לתהליכי שינוי:</h3>
   <RenderSelect
     value={teamReadiness}
-    onChange={setTeamReadiness}
+    onChange={updateTeamReadiness}
     options={teamReadinessOptions}
     name="readiness"
     placeholder="בחר רמת מוכנות"
@@ -234,7 +299,7 @@ const PostMappingQuestions = () => {
   <h3 className="text-lg font-semibold mb-4 text-right">3. המשאבים הזמינים לתהליך:</h3>
   <RenderSelect
     value={availableResources}
-    onChange={setAvailableResources}
+    onChange={updateAvailableResources}
     options={availableResourcesOptions}
     name="resources"
     placeholder="בחר זמינות משאבים"

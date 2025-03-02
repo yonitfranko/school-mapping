@@ -110,7 +110,7 @@ const MainTabs = ({ formId }) => {
             value="part-c" 
             className="text-right hover:bg-[#cceef5] data-[state=active]:bg-[#cceef5]"
           >
-            חישובים ושאלות
+   ממצאים ועיבוד
           </TabsTrigger>
           <TabsTrigger 
             value="part-b" 

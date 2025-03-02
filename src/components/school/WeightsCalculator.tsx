@@ -25,12 +25,24 @@ const WeightsCalculator = () => {
   const [schoolName, setSchoolName] = useState<string>("")
   const [calculatedWeights, setCalculatedWeights] = useState<ZoneWeight[]>(zoneWeights)
 
+  // פונקציית עזר להשגת מזהה טופס נוכחי
+  const getCurrentFormId = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const formId = urlParams.get('id');
+    return formId || 'new';
+  }
+
   const calculateWeights = useCallback(() => {
-    const savedRatings = localStorage.getItem('zoneRatings')
-    console.log('Loading ratings:', savedRatings)
+    const formId = getCurrentFormId();
+    // נסה לקרוא מהמקום החדש עם מזהה בית הספר
+    const savedRatings = localStorage.getItem(`zoneRatings_${formId}`)
+    // אם אין במקום החדש, נסה לקרוא מהמקום הישן
+    const oldSavedRatings = !savedRatings ? localStorage.getItem('zoneRatings') : null;
     
-    if (savedRatings) {
-      const loadedRatings = JSON.parse(savedRatings)
+    console.log('Loading ratings for form', formId, ':', savedRatings || oldSavedRatings)
+    
+    if (savedRatings || oldSavedRatings) {
+      const loadedRatings = JSON.parse(savedRatings || oldSavedRatings || '{}')
       console.log('Parsed ratings:', loadedRatings)
 
       // מיפוי בין המפתחות לזירות
@@ -83,25 +95,35 @@ const WeightsCalculator = () => {
 
   // טעינת שם בית הספר
   useEffect(() => {
-    const savedSchoolData = localStorage.getItem('schoolData')
-    if (savedSchoolData) {
-      const data = JSON.parse(savedSchoolData)
-      setSchoolName(data.schoolName || "")
+    const formId = getCurrentFormId();
+    // נסה לקרוא מהמקום החדש
+    const savedSchoolData = localStorage.getItem(`schoolDetails_${formId}`);
+    // אם אין, נסה מהמקום הישן
+    const oldSavedSchoolData = !savedSchoolData ? localStorage.getItem('schoolData') : null;
+    
+    if (savedSchoolData || oldSavedSchoolData) {
+      try {
+        const data = JSON.parse(savedSchoolData || oldSavedSchoolData || '{}');
+        setSchoolName(data.schoolName || "");
+      } catch (e) {
+        console.error("Error parsing school data:", e);
+      }
     }
   }, [])
 
   // טעינה ראשונית והאזנה לשינויים
   useEffect(() => {
-    calculateWeights()
+    calculateWeights();
 
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'zoneRatings') {
-        calculateWeights()
+      // הוספת בדיקה גם למפתחות החדשים
+      if (e.key === 'zoneRatings' || e.key?.startsWith('zoneRatings_')) {
+        calculateWeights();
       }
     }
 
-    window.addEventListener('storage', handleStorageChange)
-    return () => window.removeEventListener('storage', handleStorageChange)
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, [calculateWeights])
 
   // חישוב הציון הכולל המשוקלל

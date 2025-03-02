@@ -33,7 +33,8 @@ function ExportData() {
       
       let result;
       if (exportFormat === 'csv') {
-        result = await exportToCSV(selectedCollection, userDetails.organizationId, filters);
+        result = await exportToCSV(selectedCollection, userDetails?.organizationId || "org1", filters);
+
       } else {
         result = await exportToJSON(selectedCollection, userDetails.organizationId, filters);
       }
